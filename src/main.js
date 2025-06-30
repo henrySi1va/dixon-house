@@ -1,57 +1,59 @@
-import './assets/main.css'
-
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
-// Scene setup
+// Scene
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xdddddd);
+scene.background = new THREE.Color(0xeeeeee);
 
-// Camera setup
+// Camera
 const camera = new THREE.PerspectiveCamera(
   75,
   window.innerWidth / window.innerHeight,
   0.1,
   1000
 );
-camera.position.set(2, 2, 5);
+camera.position.set(5, 5, 5);
 
-// Renderer setup
+// Renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// Controls setup
+// Controls
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
 
-// Add a light
-const light = new THREE.DirectionalLight(0xffffff, 1);
-light.position.set(5, 10, 7.5);
+// Light
+const light = new THREE.HemisphereLight(0xffffff, 0x444444);
+light.position.set(0, 20, 0);
 scene.add(light);
 
-// Add a cube
-const geometry = new THREE.BoxGeometry();
-const material = new THREE.MeshStandardMaterial({ color: 0x0077ff });
-const cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
+// Load GLTF
+const loader = new GLTFLoader();
+loader.load(
+  '/dixon_house.gltf',
+  (gltf) => {
+    const model = gltf.scene;
+    model.rotation.x = -Math.PI / 2; // Rotate since export rotated model
+    scene.add(model);a
+  },
+  undefined,
+  (error) => {
+    console.error(error);
+  }
+);
 
-// Animation loop
-function animate() {
-  requestAnimationFrame(animate);
-
-  cube.rotation.x += 0.01;
-  cube.rotation.y += 0.01;
-
-  controls.update();
-  renderer.render(scene, camera);
-}
-
-animate();
-
-// Handle window resize
+// Resize
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+// Render loop
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
