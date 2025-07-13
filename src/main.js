@@ -34,8 +34,41 @@ loader.load(
   '/dixon_house.gltf',
   (gltf) => {
     const model = gltf.scene;
-    model.rotation.x = -Math.PI / 2; // Rotate since export rotated model
-    scene.add(model);a
+    // model.rotation.x = -Math.PI / 2; // Rotate if y-axis is not up
+    scene.add(model);
+
+    // Add edges to the model
+    model.traverse((child) => {
+      console.log(child);
+      if (child.isMesh) {
+          const edges = new THREE.EdgesGeometry(child.geometry, 0.1);
+          const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
+          const line = new THREE.LineSegments( edges, lineMaterial);
+          line.position.copy(child.position);
+          line.rotation.copy(child.rotation);
+          line.scale.copy(child.scale);
+          child.add(line);
+      }
+    });
+
+    // Compute bounding box
+    const box = new THREE.Box3().setFromObject(model);
+    const center = new THREE.Vector3();
+    const size = new THREE.Vector3();
+    box.getCenter(center);
+    box.getSize(size);
+
+    // Reposition camera to fit the whole model
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const fov = camera.fov * (Math.PI / 180);
+    let cameraZ = maxDim / (2 * Math.tan(fov / 2));
+
+    camera.position.set(center.x + maxDim * 0.3, center.y + maxDim * 0.3, cameraZ * 0.6);
+    camera.lookAt(center);
+
+    // Set controls target to center too
+    controls.target.copy(center);
+    controls.update();
   },
   undefined,
   (error) => {
