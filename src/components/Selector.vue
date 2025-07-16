@@ -6,7 +6,9 @@
 </script>
 
 <template>
-  <div class="w-fit h-fit">
-    <span class="m-0.5 pl-1 pr-1 text-2xl border-2" v-for="model in models" :key="model.index">{{ model.name }}</span>
+  <div class="flex flex-wrap gap-2 mb-2 w-full max-w-[700px]">
+    <button class="px-4 py-2 bg-yellow-200 border border-yellow-300 rounded shadow-sm hover:bg-yellow-100">Version 1</button>
+    <button class="px-4 py-2 bg-yellow-200 border border-yellow-300 rounded shadow-sm hover:bg-yellow-100">Version 2</button>
+    <button class="px-4 py-2 bg-yellow-200 border border-yellow-300 rounded shadow-sm hover:bg-yellow-100">Version 3</button>
   </div>
 </template>

@@ -121,8 +121,6 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div
-    ref="viewerContainer"
-    class="w-96 h-96 bg-white outline-2 rounded-md"
-  ></div>
+  <div ref="viewerContainer" class="w-full aspect-[1/1] max-w-[700px] bg-yellow-200 border border-yellow-300 rounded-lg flex items-center justify-center">
+  </div>
 </template>

@@ -5,24 +5,19 @@ import Navigation from '@/components/Navigation.vue';
 </script>
 
 <template>
-  <div class="flex flex-col items-center w-full h-full min-h-screen">
-    <!-- Tabs/Selector above and flush left with viewer -->
-    <div class="flex w-full max-w-5xl mt-8">
-      <div class="flex flex-col w-full">
-        <div class="flex">
-          <Selector />
-        </div>
-        <div class="flex flex-col md:flex-row w-full">
-          <!-- Viewer -->
-          <div class="flex-1 flex justify-center items-start">
-            <Viewer />
-          </div>
-          <!-- Navigation: right on desktop, below on mobile -->
-          <div class="md:ml-8 md:w-64 w-full mt-4 md:mt-0 flex-shrink-0 flex justify-center">
-            <Navigation />
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+<main class="flex flex-col md:flex-row p-6 gap-6 flex-1 items-start justify-center">
+    <!-- Left Section: Tabs and 3D Viewer -->
+    <section class="flex-1 flex flex-col max-w-screen-md w-full items-center">
+      <Selector />
+      <Viewer />
+    </section>
+
+    <!-- Right Section: Navigation Menu -->
+    <aside class="w-full md:w-64 bg-yellow-100 border border-yellow-200 p-4 rounded-lg h-fit md:h-auto md:self-start md:mt-[3rem]">
+      <!-- Toggle Button -->
+      <button class="w-full mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Toggle Floorplan / 3D</button>
+
+       <Navigation/>
+    </aside>
+  </main>
 </template>
