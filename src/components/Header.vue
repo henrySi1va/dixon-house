@@ -1,10 +1,9 @@
+<script setup>
+</script>
+
 <template>
-  <header class="w-full flex flex-col py-6">
-    <h1 class="text-3xl font-bold tracking-wide m-0">Dixon House</h1>
-    <p>Use the tabs to select a version of the house and the navigation menu to go to different rooms.</p>
+  <header class="p-6 bg-yellow-100 shadow-md rounded-b-lg">
+    <h1 class="text-2xl font-bold mb-2">Dixon House Viewer</h1>
+    <p class="text-gray-700">Use the tabs to select different versions and use the navigation menu to move the camera to different rooms.</p>
   </header>
 </template>
-
-<script setup>
-// No script logic needed for a simple header
-</script>

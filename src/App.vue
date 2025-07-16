@@ -1,15 +1,12 @@
 <script setup>
-import Interface from './components/Interface.vue';
 import Header from '@/components/Header.vue';
+import Interface from '@/components/Interface.vue';
 </script>
 
 <template>
 <body class="bg-yellow-50 text-gray-800 min-h-screen flex flex-col">
-  <!-- Header -->
-  <header class="p-6 bg-yellow-100 shadow-md rounded-b-lg">
-    <h1 class="text-2xl font-bold mb-2">Family Home Renovation Viewer</h1>
-    <p class="text-gray-700">Select a version, interact with the 3D model, and navigate rooms below.</p>
-  </header>
+
+  <Header />
 
   <!-- Main Content -->
   <main class="flex flex-col md:flex-row p-6 gap-6 mt-8 flex-1 items-start justify-center">
