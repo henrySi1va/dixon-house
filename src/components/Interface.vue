@@ -16,8 +16,7 @@ import Navigation from '@/components/Navigation.vue';
     <aside class="w-full md:w-64 bg-yellow-100 border border-yellow-200 p-4 rounded-lg h-fit md:h-auto md:self-start md:mt-[3rem]">
       <!-- Toggle Button -->
       <button class="w-full mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Toggle Floorplan / 3D</button>
-
-       <Navigation/>
+      <Navigation/>
     </aside>
   </main>
 </template>
