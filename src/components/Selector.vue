@@ -7,8 +7,9 @@
 
 <template>
   <div class="flex flex-wrap gap-2 mb-2 w-full max-w-[700px]">
-    <button class="px-4 py-2 bg-yellow-200 border border-yellow-300 rounded shadow-sm hover:bg-yellow-100">Version 1</button>
-    <button class="px-4 py-2 bg-yellow-200 border border-yellow-300 rounded shadow-sm hover:bg-yellow-100">Version 2</button>
-    <button class="px-4 py-2 bg-yellow-200 border border-yellow-300 rounded shadow-sm hover:bg-yellow-100">Version 3</button>
+    <button v-for="model in models" :key="model.id"
+            class="px-4 py-2 min-w-24 bg-yellow-200 border
+            border-yellow-300 rounded shadow-sm hover:bg-yellow-100">
+            {{ model.name }}</button>
   </div>
 </template>
