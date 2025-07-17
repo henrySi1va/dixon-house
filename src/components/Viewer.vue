@@ -1,11 +1,12 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { useViewerStore } from '@/store/store.js';
 
 const viewerContainer = ref(null);
-const usePerspective = ref(true);
+const viewerStore = useViewerStore();
 
 let renderer, scene, controls, animationId;
 let perspectiveCamera, orthographicCamera, camera;
@@ -65,13 +66,12 @@ function createCameras(width, height) {
     frustumSize / 2, frustumSize / -2,
     0.1, 1000
   );
-  camera = usePerspective.value ? perspectiveCamera : orthographicCamera;
+  camera = viewerStore.view === "3D" ? perspectiveCamera : orthographicCamera;
 }
 
-function switchCamera() {
-  usePerspective.value = !usePerspective.value;
+function switchCamera(viewType) {
   const prevCamera = camera;
-  camera = usePerspective.value ? perspectiveCamera : orthographicCamera;
+  camera = viewType === "3D" ? perspectiveCamera : orthographicCamera;
   camera.position.copy(prevCamera.position);
   camera.up.copy(prevCamera.up);
   camera.lookAt(controls.target);
@@ -147,6 +147,14 @@ onMounted(() => {
   }
   animate();
 });
+
+// Watch for view changes and switch camera accordingly
+watch(
+  () => viewerStore.view,
+  (newView) => {
+    switchCamera(newView);
+  }
+);
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', onWindowResize);
