@@ -56,7 +56,8 @@ export function fitCameraToObject(cam, controls, object, modelCenter, modelSize)
     controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
     // Set touches for pan only on mobile
     controls.touches = {
-      ONE: THREE.TOUCH.PAN
+      ONE: THREE.TOUCH.PAN,
+      TWO: THREE.TOUCH.DOLLY_PAN
     };
     controls.update();
   }
