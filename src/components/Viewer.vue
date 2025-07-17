@@ -10,6 +10,8 @@ const viewerStore = useViewerStore();
 
 let renderer, scene, controls, animationId;
 let perspectiveCamera, orthographicCamera, camera;
+let modelCenter = new THREE.Vector3();
+let modelSize = new THREE.Vector3();
 
 function addLights(scene) {
   const light = new THREE.HemisphereLight(0xffffff, 0x444444);
@@ -33,27 +35,36 @@ function addModelEdges(model) {
 
 function fitCameraToObject(cam, controls, object) {
   const box = new THREE.Box3().setFromObject(object);
-  const center = new THREE.Vector3();
-  const size = new THREE.Vector3();
-  box.getCenter(center);
-  box.getSize(size);
+  box.getCenter(modelCenter);
+  box.getSize(modelSize);
 
-  const maxDim = Math.max(size.x, size.y, size.z);
+  const maxDim = Math.max(modelSize.x, modelSize.y, modelSize.z);
 
   if (cam.isPerspectiveCamera) {
     const fov = cam.fov * (Math.PI / 180);
     const cameraZ = maxDim / (2 * Math.tan(fov / 2));
-    cam.position.set(center.x + maxDim * 0.3, center.y + maxDim * 0.3, cameraZ * 0.6);
-    cam.lookAt(center);
+    cam.position.set(modelCenter.x + maxDim * 0.3, modelCenter.y + maxDim * 0.3, cameraZ * 0.6);
+    cam.lookAt(modelCenter);
+    controls.target.copy(modelCenter);
+    controls.enablePan = false;
+    controls.enableRotate = true;
+    controls.enableZoom = true;
+    controls.update();
   } else if (cam.isOrthographicCamera) {
-    cam.position.set(center.x, center.y + maxDim, center.z);
+    // Place camera directly above the model, looking down
+    cam.position.set(modelCenter.x, modelCenter.y + maxDim * 1.2, modelCenter.z);
     cam.up.set(0, 0, -1);
-    cam.lookAt(center);
+    cam.lookAt(modelCenter);
     cam.updateProjectionMatrix();
+    controls.target.copy(modelCenter);
+    // Restrict controls to pan only
+    controls.enablePan = true;
+    controls.enableRotate = false;
+    controls.enableZoom = true;
+    // Enable left-click to pan.
+    controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
+    controls.update();
   }
-
-  controls.target.copy(center);
-  controls.update();
 }
 
 function createCameras(width, height) {
@@ -72,14 +83,19 @@ function createCameras(width, height) {
 function switchCamera(viewType) {
   const prevCamera = camera;
   camera = viewType === "3D" ? perspectiveCamera : orthographicCamera;
-  camera.position.copy(prevCamera.position);
-  camera.up.copy(prevCamera.up);
-  camera.lookAt(controls.target);
 
+  // Re-create controls for new camera
   controls.dispose();
   controls = new OrbitControls(camera, renderer.domElement);
-  controls.target.copy(prevCamera instanceof THREE.PerspectiveCamera ? controls.target : controls.target);
-  controls.update();
+
+  // Reset camera position and controls for each type
+  if (viewType === "3D") {
+    // Perspective: reset position and controls
+    fitCameraToObject(camera, controls, scene.getObjectByName('modelRoot') || scene.children[scene.children.length - 1]);
+  } else {
+    // Orthographic: place above, restrict controls
+    fitCameraToObject(camera, controls, scene.getObjectByName('modelRoot') || scene.children[scene.children.length - 1]);
+  }
 }
 
 function onWindowResize() {
@@ -126,6 +142,7 @@ onMounted(() => {
     '/dixon_house.gltf',
     (gltf) => {
       const model = gltf.scene;
+      model.name = 'modelRoot'; // For easy reference
       scene.add(model);
       addModelEdges(model);
       fitCameraToObject(camera, controls, model);
