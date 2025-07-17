@@ -1,0 +1,121 @@
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import * as THREE from 'three';
+
+export function addLights(scene) {
+  const light = new THREE.HemisphereLight(0xffffff, 0x444444);
+  light.position.set(0, 20, 0);
+  scene.add(light);
+}
+
+export function addModelEdges(model) {
+  model.traverse((child) => {
+    if (child.isMesh) {
+      const edges = new THREE.EdgesGeometry(child.geometry, 0.1);
+      const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
+      const line = new THREE.LineSegments(edges, lineMaterial);
+      line.position.copy(child.position);
+      line.rotation.copy(child.rotation);
+      line.scale.copy(child.scale);
+      child.add(line);
+    }
+  });
+}
+
+export function fitCameraToObject(cam, controls, object, modelCenter, modelSize) {
+  const box = new THREE.Box3().setFromObject(object);
+  box.getCenter(modelCenter);
+  box.getSize(modelSize);
+
+  const maxDim = Math.max(modelSize.x, modelSize.y, modelSize.z);
+
+  if (cam.isPerspectiveCamera) {
+    const fov = cam.fov * (Math.PI / 180);
+    const cameraZ = maxDim / (2 * Math.tan(fov / 2));
+    cam.position.set(modelCenter.x + maxDim * 0.3, modelCenter.y + maxDim * 0.3, cameraZ * 0.6);
+    cam.lookAt(modelCenter);
+    controls.target.copy(modelCenter);
+    controls.enablePan = true;
+    controls.enableRotate = true;
+    controls.enableZoom = true;
+    // Reset touches to default for perspective
+    controls.touches = {
+      ONE: THREE.TOUCH.ROTATE,
+      TWO: THREE.TOUCH.DOLLY_PAN
+    };
+    controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE;
+    controls.update();
+  } else if (cam.isOrthographicCamera) {
+    cam.position.set(modelCenter.x, modelCenter.y + maxDim * 1.2, modelCenter.z);
+    cam.up.set(0, 0, -1);
+    cam.lookAt(modelCenter);
+    cam.updateProjectionMatrix();
+    controls.target.copy(modelCenter);
+    controls.enablePan = true;
+    controls.enableRotate = true;
+    controls.enableZoom = true;
+    controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
+    // Set touches for pan only on mobile
+    controls.touches = {
+      ONE: THREE.TOUCH.PAN
+    };
+    controls.update();
+  }
+}
+
+export function createCameras(width, height, viewType) {
+  const aspect = width / height;
+  const frustumSize = 20;
+
+  const perspectiveCamera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
+  const orthographicCamera = new THREE.OrthographicCamera(
+    (frustumSize * aspect) / -2, (frustumSize * aspect) / 2,
+    frustumSize / 2, frustumSize / -2,
+    0.1, 1000
+  );
+  const camera = viewType === "3D" ? perspectiveCamera : orthographicCamera;
+  return { perspectiveCamera, orthographicCamera, camera };
+}
+
+export function switchCamera(
+  viewType,
+  perspectiveCamera,
+  orthographicCamera,
+  oldControls,
+  renderer,
+  scene,
+  modelCenter,
+  modelSize
+) {
+  // Dispose old controls
+  if (oldControls) oldControls.dispose();
+
+  // Select camera
+  const camera = viewType === "3D" ? perspectiveCamera : orthographicCamera;
+  // Create new controls
+  const controls = new OrbitControls(camera, renderer.domElement);
+
+  // Set up controls and camera position
+  const model = scene.getObjectByName('modelRoot') || scene.children[scene.children.length - 1];
+  fitCameraToObject(camera, controls, model, modelCenter, modelSize);
+
+  return { camera, controls };
+}
+
+export function onWindowResize(viewerContainer, camera, perspectiveCamera, orthographicCamera, renderer) {
+  if (!viewerContainer.value || !camera || !renderer) return;
+  const width = viewerContainer.value.clientWidth;
+  const height = viewerContainer.value.clientHeight;
+
+  perspectiveCamera.aspect = width / height;
+  perspectiveCamera.updateProjectionMatrix();
+
+  const aspect = width / height;
+  const frustumSize = 20;
+  orthographicCamera.left = (frustumSize * aspect) / -2;
+  orthographicCamera.right = (frustumSize * aspect) / 2;
+  orthographicCamera.top = frustumSize / 2;
+  orthographicCamera.bottom = frustumSize / -2;
+  orthographicCamera.updateProjectionMatrix();
+
+  renderer.setSize(width, height);
+}
