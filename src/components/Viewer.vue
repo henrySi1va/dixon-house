@@ -7,6 +7,7 @@ import { useViewerStore } from '@/store/store.js';
 
 const viewerContainer = ref(null);
 const viewerStore = useViewerStore();
+const isFullscreen = ref(false);
 
 let renderer, scene, controls, animationId;
 let perspectiveCamera, orthographicCamera, camera;
@@ -117,6 +118,38 @@ function onWindowResize() {
   renderer.setSize(width, height);
 }
 
+// --- Fullscreen logic ---
+function toggleFullscreen() {
+  const el = viewerContainer.value?.parentElement;
+  if (!el) return;
+  if (!isFullscreen.value) {
+    if (el.requestFullscreen) {
+      el.requestFullscreen();
+    } else if (el.webkitRequestFullscreen) {
+      el.webkitRequestFullscreen();
+    } else if (el.mozRequestFullScreen) {
+      el.mozRequestFullScreen();
+    } else if (el.msRequestFullscreen) {
+      el.msRequestFullscreen();
+    }
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    } else if (document.mozCancelFullScreen) {
+      document.mozCancelFullScreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+    }
+  }
+}
+
+function fullscreenChangeHandler() {
+  const el = viewerContainer.value?.parentElement;
+  isFullscreen.value = !!document.fullscreenElement && document.fullscreenElement === el;
+}
+
 onMounted(() => {
   // Scene
   scene = new THREE.Scene();
@@ -156,6 +189,9 @@ onMounted(() => {
   // Handle Resize
   window.addEventListener('resize', onWindowResize);
 
+  // Fullscreen event
+  document.addEventListener('fullscreenchange', fullscreenChangeHandler);
+
   // Animation Loop
   function animate() {
     animationId = requestAnimationFrame(animate);
@@ -175,6 +211,7 @@ watch(
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', onWindowResize);
+  document.removeEventListener('fullscreenchange', fullscreenChangeHandler);
   if (animationId) cancelAnimationFrame(animationId);
   if (renderer) {
     renderer.dispose();
@@ -191,13 +228,19 @@ onBeforeUnmount(() => {
 
 <template>
   <div
-    class="w-full aspect-[1/1] max-w-[700px] bg-yellow-200 border
-    border-yellow-300 rounded-lg flex items-center justify-center overflow-hidden"
+    class="w-full aspect-[1/1] max-w-[700px] bg-yellow-200 border border-yellow-300 rounded-lg flex items-center justify-center overflow-hidden relative"
   >
     <div
       ref="viewerContainer"
       class="w-full h-full"
       style="position: relative;"
     ></div>
+    <button
+      class="absolute top-4 right-4 px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-700 z-20 text-sm"
+      @click="toggleFullscreen"
+      type="button"
+    >
+      {{ isFullscreen ? 'Exit Fullscreen' : 'Fullscreen' }}
+    </button>
   </div>
 </template>
