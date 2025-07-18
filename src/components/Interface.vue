@@ -11,7 +11,7 @@ const viewerStore = useViewerStore();
   <main class="flex flex-col md:flex-row p-6 gap-6 flex-1 items-start justify-center">
     <!-- Left Section: Tabs and 3D Viewer -->
     <section class="flex-1 flex flex-col max-w-screen-md w-full items-center">
-      <!-- <Selector /> -->
+      <Selector />
       <Viewer />
     </section>
 
@@ -24,7 +24,7 @@ const viewerStore = useViewerStore();
       >
         Switch to {{ viewerStore.view === "3D" ? "Floorplan" : "3D" }} View
       </button>
-      <!-- <Navigation/> -->
+      <Navigation/>
     </aside>
   </main>
 </template>

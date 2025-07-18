@@ -10,7 +10,8 @@ import {
   fitCameraToObject,
   createCameras,
   switchCamera as switchCameraHelper,
-  onWindowResize as onWindowResizeHelper
+  onWindowResize as onWindowResizeHelper,
+  extractRoomsFromGLTF
 } from '@/utils/ViewerHelper.js';
 
 const viewerContainer = ref(null);
@@ -83,6 +84,11 @@ onMounted(() => {
       scene.add(model);
       addModelEdges(model);
       fitCameraToObject(camera, controls, model, modelCenter, modelSize);
+
+      // Extract rooms and update store
+      const rooms = extractRoomsFromGLTF(model);
+      viewerStore.clearRooms();
+      viewerStore.setRooms(rooms);
     },
     undefined,
     (error) => {
@@ -119,6 +125,47 @@ watch(
     );
     camera = result.camera;
     controls = result.controls; // Replace controls instance!
+  }
+);
+
+watch(
+  () => viewerStore.highlightedRoomId,
+  (roomId) => {
+    // Remove previous outlines
+    viewerStore.rooms.forEach(room => {
+      if (room.meshes) {
+        room.meshes.forEach(mesh => {
+          if (mesh.userData.outlineMesh) {
+            mesh.remove(mesh.userData.outlineMesh);
+            mesh.userData.outlineMesh = null;
+          }
+        });
+      }
+    });
+    // Add outline to the highlighted room
+    if (roomId) {
+      const room = viewerStore.rooms.find(r => r.id === roomId);
+      if (room && room.meshes) {
+        room.meshes.forEach(mesh => {
+          const outlineMaterial = new THREE.MeshBasicMaterial({
+            color: 0xffa500,
+            side: THREE.BackSide,
+            transparent: true,
+            opacity: 0.7,
+            depthTest: false
+          });
+          const outlineMesh = new THREE.Mesh(mesh.geometry.clone(), outlineMaterial);
+          outlineMesh.scale.copy(mesh.scale).multiplyScalar(1);
+          outlineMesh.position.copy(mesh.position);
+          outlineMesh.rotation.copy(mesh.rotation);
+          outlineMesh.quaternion.copy(mesh.quaternion);
+          outlineMesh.updateMatrix();
+          outlineMesh.updateMatrixWorld();
+          mesh.add(outlineMesh);
+          mesh.userData.outlineMesh = outlineMesh;
+        });
+      }
+    }
   }
 );
 

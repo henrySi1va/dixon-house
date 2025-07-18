@@ -31,7 +31,7 @@ export function fitCameraToObject(cam, controls, object, modelCenter, modelSize)
   if (cam.isPerspectiveCamera) {
     const fov = cam.fov * (Math.PI / 180);
     const cameraZ = maxDim / (2 * Math.tan(fov / 2));
-    cam.position.set(modelCenter.x + maxDim * 0.3, modelCenter.y + maxDim * 0.3, cameraZ * 0.6);
+    cam.position.set(modelCenter.x + maxDim * 0.3, modelCenter.y + maxDim * 0.3, cameraZ * 1.0);
     cam.lookAt(modelCenter);
     controls.target.copy(modelCenter);
     controls.enablePan = true;
@@ -45,6 +45,7 @@ export function fitCameraToObject(cam, controls, object, modelCenter, modelSize)
     controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE;
     controls.update();
   } else if (cam.isOrthographicCamera) {
+    cam.zoom = 0.95;
     cam.position.set(modelCenter.x, modelCenter.y + maxDim * 1.2, modelCenter.z);
     cam.up.set(0, 0, -1);
     cam.lookAt(modelCenter);
@@ -119,4 +120,30 @@ export function onWindowResize(viewerContainer, camera, perspectiveCamera, ortho
   orthographicCamera.updateProjectionMatrix();
 
   renderer.setSize(width, height);
+}
+
+export function extractRoomsFromGLTF(model) {
+  const rooms = [];
+  model.traverse((child) => {
+    if (
+      child.type === 'Group' &&
+      child.name !== 'Walls' &&
+      child.name !== 'Wall' &&
+      child.name !== 'Foundation' &&
+      child.name !== 'modelRoot'
+    ) {
+      // Collect all meshes within this group
+      const meshes = [];
+      child.traverse((sub) => {
+        if (sub.isMesh) meshes.push(sub);
+      });
+      rooms.push({
+        id: child.uuid,
+        name: child.name || `Room`,
+        group: child,
+        meshes
+      });
+    }
+  });
+  return rooms;
 }
