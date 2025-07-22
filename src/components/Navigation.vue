@@ -23,7 +23,7 @@ function handleLeave() {
           @mouseenter="handleHover(room)"
           @mouseleave="handleLeave"
         >
-          {{ room.name.replaceAll('_', ' ') }}
+          {{ room.name }}
         </button>
       </li>
     </ul>

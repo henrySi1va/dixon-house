@@ -127,11 +127,14 @@ export function extractRoomsFromGLTF(model) {
   model.traverse((child) => {
     if (
       child.type === 'Group' &&
-      child.name !== 'Walls' &&
-      child.name !== 'Wall' &&
-      child.name !== 'Foundation' &&
-      child.name !== 'modelRoot'
+      typeof child.name === 'string' &&
+      child.name.startsWith('r_')
     ) {
+      // Extract room name after the prefix
+      let name = child.name.substring(2);
+      name = name.replaceAll('_', ' ');
+      // Capitalize first letter of each word
+      name = name.replace(/\b\w/g, c => c.toUpperCase());
       // Collect all meshes within this group
       const meshes = [];
       child.traverse((sub) => {
@@ -139,7 +142,7 @@ export function extractRoomsFromGLTF(model) {
       });
       rooms.push({
         id: child.uuid,
-        name: child.name || `Room`,
+        name,
         group: child,
         meshes
       });
