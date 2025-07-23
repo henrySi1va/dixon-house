@@ -150,3 +150,52 @@ export function extractRoomsFromGLTF(model) {
   });
   return rooms;
 }
+
+/**
+ * Moves the camera to the center of the given room.
+ * @param {THREE.Camera} camera
+ * @param {OrbitControls} controls
+ * @param {Object} room - Room object with .meshes array
+ * @param {string} mode - "perspective" or "orthographic"
+ * @param {number} standingHeight - Height above the floor for perspective mode (default 2)
+ */
+export function moveCameraToRoom(camera, controls, room, mode = "perspective", standingHeight = 2) {
+  if (!room || !room.meshes || room.meshes.length === 0) return;
+
+  // Compute bounding box of all meshes in the room
+  const box = new THREE.Box3();
+  room.meshes.forEach(mesh => box.expandByObject(mesh));
+  const center = new THREE.Vector3();
+  box.getCenter(center);
+
+  if (mode === "perspective") {
+    // First-person: place camera at center + standingHeight, looking forward (positive Z)
+    camera.position.set(center.x, center.y + standingHeight, center.z);
+
+    // Look forward along +Z from the center (adjust as needed for your model orientation)
+    const lookAt = new THREE.Vector3(center.x, center.y + standingHeight, center.z + 1);
+    camera.lookAt(lookAt);
+    controls.target.copy(lookAt);
+
+    // Only allow rotation (simulate head movement)
+    controls.enablePan = false;
+    controls.enableZoom = false;
+    controls.enableRotate = true;
+    controls.touches = {
+      ONE: THREE.TOUCH.ROTATE,
+      TWO: THREE.TOUCH.NONE
+    };
+    controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE;
+    controls.update();
+  } else if (mode === "orthographic") {
+    // Place camera above the room, looking straight down
+    const boxSize = box.getSize(new THREE.Vector3());
+    const above = 5 + boxSize.y;
+    camera.position.set(center.x, center.y + above, center.z);
+    camera.up.set(0, 0, -1);
+    camera.lookAt(center);
+    camera.updateProjectionMatrix();
+    controls.target.copy(center);
+    // No need to update orthographic camera controls
+  }
+}

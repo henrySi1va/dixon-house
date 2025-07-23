@@ -6,6 +6,7 @@ export const useViewerStore = defineStore('viewer', {
     view: "3D",
     rooms: [],
     highlightedRoomId: null,
+    selectedRoom: null,
   }),
   actions: {
     toggleView() {
@@ -29,6 +30,8 @@ export const useViewerStore = defineStore('viewer', {
     },
     clearHighlight() {
       this.highlightedRoomId = null;
-    }
+    },
+    setSelectedRoom(roomId) { this.selectedRoom = roomId; },
+    clearSelectedRoom() { this.selectedRoom = null; },
   },
 });

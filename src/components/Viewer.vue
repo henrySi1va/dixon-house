@@ -11,7 +11,8 @@ import {
   createCameras,
   switchCamera as switchCameraHelper,
   onWindowResize as onWindowResizeHelper,
-  extractRoomsFromGLTF
+  extractRoomsFromGLTF,
+  moveCameraToRoom
 } from '@/utils/ViewerHelper.js';
 
 const viewerContainer = ref(null);
@@ -165,6 +166,29 @@ watch(
           mesh.userData.outlineMesh = outlineMesh;
         });
       }
+    }
+  }
+);
+
+// Watch for selected room changes
+watch(
+  () => viewerStore.selectedRoom,
+  (roomId) => {
+    if (roomId) {
+      const room = viewerStore.rooms.find(r => r.id === roomId);
+      if (room) {
+        const mode = camera.isOrthographicCamera ? "orthographic" : "perspective";
+        moveCameraToRoom(camera, controls, room, mode);
+      }
+    } else {
+      // Reset camera to default position and target
+      fitCameraToObject(
+        camera,
+        controls,
+        scene.getObjectByName('modelRoot'),
+        modelCenter,
+        modelSize
+      );
     }
   }
 );
