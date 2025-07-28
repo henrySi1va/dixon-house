@@ -78,7 +78,7 @@ onMounted(() => {
   // Load Model
   const loader = new GLTFLoader();
   loader.load(
-    '/dixon_house_v19.gltf',
+    '/dixon_house_v27.gltf',
     (gltf) => {
       const model = gltf.scene;
       model.name = 'modelRoot';

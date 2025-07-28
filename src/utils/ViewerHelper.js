@@ -31,7 +31,7 @@ export function fitCameraToObject(cam, controls, object, modelCenter, modelSize)
   if (cam.isPerspectiveCamera) {
     const fov = cam.fov * (Math.PI / 180);
     const cameraZ = maxDim / (2 * Math.tan(fov / 2));
-    cam.position.set(modelCenter.x + maxDim * 0.3, modelCenter.y + maxDim * 0.3, cameraZ * 1.0);
+    cam.position.set(modelCenter.x + maxDim * 0.1, modelCenter.y + maxDim * 0.2, cameraZ * 0.3);
     cam.lookAt(modelCenter);
     controls.target.copy(modelCenter);
     controls.enablePan = true;
@@ -173,7 +173,7 @@ export function moveCameraToRoom(camera, controls, room, mode = "perspective", s
     camera.position.set(center.x, center.y + standingHeight, center.z);
 
     // Look forward along +Z from the center (adjust as needed for your model orientation)
-    const lookAt = new THREE.Vector3(center.x, center.y + standingHeight, center.z + 1);
+    const lookAt = new THREE.Vector3(center.x, center.y + standingHeight, center.z + 0.1);
     camera.lookAt(lookAt);
     controls.target.copy(lookAt);
 
