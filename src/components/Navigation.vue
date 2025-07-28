@@ -13,6 +13,7 @@ function handleLeave() {
   viewerStore.clearHighlight();
 }
 function handleClick(room) {
+  viewerStore.clearHighlight();
   viewerStore.setSelectedRoom(room.id);
 }
 function handleReset() {
